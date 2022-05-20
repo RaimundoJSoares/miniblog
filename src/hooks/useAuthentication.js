@@ -1,13 +1,13 @@
+import { db } from '../firebase/config'
 import { useState, useEffect} from 'react'
 import {
   getAuth,
-  CreateUserWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   SignInWithEmailAndPassword,
   updateProfile,
   SignOut,
-  createUserWithEmailAndPassword
+
 } from 'firebase/auth'
-import { type } from '@testing-library/user-event/dist/type';
 
 export const useAuthentication = () => {
   const[error, setError] =useState(null);
@@ -29,26 +29,43 @@ export const useAuthentication = () => {
 
     setLoading(true)
 
+    setError(null)
+
     try {
       const { user } = await createUserWithEmailAndPassword(
         auth,
         data.email,
         data.password,
       )
-      await updateProfile(user,{displayName: data.displayName})
+      await updateProfile(user,
+        { displayName: data.displayName })
+        setLoading(false)
+
       return user
       
     } catch (error) {
       console.log(error.message)
       console.log(typeof error.Message)
       
+       let systemErrorMessage
+
+       if(error.message.includes('Password')) {
+        systemErrorMessage = 'Password need to have 6 characteres'
+       }
+       else if (error.message.includes('email-already')) {
+        systemErrorMessage = 'This email already exists'
+        } else{
+          systemErrorMessage = ' Error, please try later! '
+        }
+
+        setLoading(false)
+        setError(systemErrorMessage)
     }
-    setLoading(false)
+   
   }
 
   useEffect(() => {
     return () => setCanceled(true)
-
   }, [])
 
   return {
@@ -58,3 +75,5 @@ export const useAuthentication = () => {
     loading
   }
 }
+
+export default useAuthentication
