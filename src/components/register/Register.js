@@ -1,44 +1,42 @@
-import { useState, useEffect } from "react"
-import styles from './register.module.css'
-import useAuthentication from "../../hooks/useAuthentication"
+import { useState, useEffect } from "react";
+import styles from "./register.module.css";
+import useAuthentication from "../../hooks/useAuthentication";
 
 const Register = () => {
-  const [ displayName, setDisplayName] = useState('')
-  const [ email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [passwordConfirm, setPasswordConfirm] = useState('')
-  const[ error01, setError01] = useState('')
+  const [displayName, setDisplayName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [error01, setError01] = useState("");
 
-  const {createUser , error:authError, loading} = useAuthentication()
-  
+  const { createUser, error: authError, loading } = useAuthentication();
+
   const handleSubmit = async (e) => {
-    e.preventDefault()
-  
+    e.preventDefault();
 
-  setError01("")
+    setError01("");
 
-  const user = {
-    displayName,
-    email,
-    password,
-  }
+    const user = {
+      displayName,
+      email,
+      password,
+    };
 
-  if(password !== passwordConfirm) {
-    setError01("Passwords need to be the same")
-    return
-  }
-
-  const res = await createUser(user)
-
-  console.log(user)
-  }
-
-  useEffect(() => {
-    if(authError) {
-      setError01(authError)
+    if (password !== passwordConfirm) {
+      setError01("Passwords need to be the same");
+      return;
     }
 
-  }, [authError])
+    const res = await createUser(user);
+
+    console.log(user);
+  };
+
+  useEffect(() => {
+    if (authError) {
+      setError01(authError);
+    }
+  }, [authError]);
 
   return (
     <div className={styles.register}>
@@ -89,13 +87,16 @@ const Register = () => {
             onChange={(e) => setPasswordConfirm(e.target.value)}
           />
         </label>
-       {!loading &&  <button className="btn" >Register</button>}
-       {loading &&  <button className="btn" disabled>Wait...</button>}
+        {!loading && <button className="btn">Register</button>}
+        {loading && (
+          <button className="btn" disabled>
+            Wait...
+          </button>
+        )}
         {error01 && <p className="error">{error01}</p>}
       </form>
     </div>
-  )
-}
+  );
+};
 
-
-export default Register
+export default Register;
