@@ -1,16 +1,56 @@
 import styles from './CreatePosto.module.css'
 
 import { useState } from "react"
+import { useNavigate } from 'react-router-dom'
+import { useAuthValue} from '../../context/AuthContext'
+import { useInsertDocument } from '../../hooks/useInsertDocument'
 
 const CreatePost = () => {
+
+  const navigate = useNavigate()
   const [title, setTitle] = useState('')
   const [image, setImage] = useState('')
   const [body, setBody] = useState('')
   const [ tags, setTags ] = useState([])
   const [formError, setFormError] = useState('')
 
+  const { user } = useAuthValue()
+
+  const { insertDocument, response} = useInsertDocument('posts')
   const handleSubmit = (e) => {
     e.preventDefault()
+    setFormError("")
+
+    //validate image URL
+    try {
+      
+      new URL(image)
+
+    } catch (error) {
+      setFormError("The image needs to be an URL!")
+    }
+
+    //create tags array
+    const tagsArray = tags.split(",").map((tag) => tag.trim().toLowerCase())
+
+    //checar todos os valores
+    if (!title || !image || !tags || !body) {
+      setFormError("Please fill all the fields")
+    }
+
+    if(formError) return;
+
+    insertDocument({
+      title,
+      image,
+      body,
+      tagsArray,
+      uid:user.uid,
+      createdBy: user.displayName,
+    })
+
+    //redirect to home page
+    navigate('/')
   }
 
   return (
@@ -46,7 +86,14 @@ const CreatePost = () => {
           onChange={(e) =>setTags(e.target.value)}
           />
         </label>
-        <button className="btn">Send </button>
+        {!response.loading && <button className="btn">Register</button>}
+        { response.loading && (
+          <button className='btn' disabled>
+            Waiting...
+          </button>
+        )}
+        {response.error &&  <p className ='error'>{response.error}</p>}
+        {formError &&  <p className ='error'>{formError}</p>}
       </form>
     </div>
   )
