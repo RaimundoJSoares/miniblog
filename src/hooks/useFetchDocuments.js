@@ -2,11 +2,11 @@ import { useState, useEffect} from 'react'
 
 import { db } from '../firebase/config'
 
-import { collection, query, orderBy, onSnapshot, where, QuerySnapshot } from 'firebase/firestore'
+import { collection, query, orderBy, onSnapshot, where} from 'firebase/firestore'
 
 
 export const useFetchDocuments = (docCollection, search=null, uid=null) => {
-    const [document, setDocument] = useState(null)
+    const [document, setDocuments] = useState(null)
     const [error, setError] = useState(null)
     const [loading, setLoading]= useState(null)
 
@@ -29,10 +29,15 @@ export const useFetchDocuments = (docCollection, search=null, uid=null) => {
                 //busca
                 //dashboard
 
-                q = await query(collectionRef, orderBy('createdAt', 'desc'))
+                if(search) {  
+                    q = await query(collectionRef, where("tagsArray", "array-contains", search), orderBy("createdAt", "desc"))
+
+                }else {
+                    q = await query(collectionRef, orderBy('createdAt', 'desc'))
+                }
 
                 await onSnapshot(q, (QuerySnapshot) => {
-                    setDocument(
+                    setDocuments(
                         QuerySnapshot.docs.map((doc) => ({
                             id: doc.id,
                             ...doc.data(),
@@ -53,7 +58,7 @@ export const useFetchDocuments = (docCollection, search=null, uid=null) => {
         }
         loadData()
 
-    }, [docCollection, search, uid, cancelled])
+    }, [docCollection,document, search, uid, cancelled])
 
     useEffect(() => {
         return() => setCanceled(true)
